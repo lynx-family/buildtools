@@ -1,0 +1,86 @@
+name: Build Doxygen on Linux and macOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      doxygen-version:
+        description: 'Doxygen version to build (e.g., 1.13.2)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-14]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake flex bison
+      - name: Install Dependencies (macOS)
+        if: matrix.os == 'macos-14'
+        run: |
+          brew update
+          brew install cmake flex bison
+          echo "/opt/homebrew/bin:/opt/homebrew/opt/bison/bin" >> $GITHUB_PATH
+      - name: Download Doxygen
+        run: |
+          curl -L -o doxygen-${{ github.event.inputs.doxygen-version }}.src.tar.gz \
+            https://www.doxygen.nl/files/doxygen-${{ github.event.inputs.doxygen-version }}.src.tar.gz
+      - name: Extract Source
+        run: |
+          tar -zxvf doxygen-${{ github.event.inputs.doxygen-version }}.src.tar.gz
+      - name: Create Build Directory
+        run: |
+          mkdir doxygen-${{ github.event.inputs.doxygen-version }}/build
+          cd doxygen-${{ github.event.inputs.doxygen-version }}/build
+      - name: Configure with CMake
+        run: |
+          cd doxygen-${{ github.event.inputs.doxygen-version }}/build
+          cmake -G "Unix Makefiles" ..
+      - name: Compile Doxygen
+        run: |
+          cd doxygen-${{ github.event.inputs.doxygen-version }}/build
+          make -j$(nproc || sysctl -n hw.ncpu)
+      - name: Verify Binary
+        run: |
+          ls -lh doxygen-${{ github.event.inputs.doxygen-version }}/build/bin/doxygen
+          doxygen-${{ github.event.inputs.doxygen-version }}/build/bin/doxygen --version
+      - name: Package Binary
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-22.04" ]; then
+            tar -czvf buildtools-doxygen-linux-x86_64.tar.gz -C doxygen-${{ github.event.inputs.doxygen-version }}/build/bin doxygen
+          else
+            tar -czvf buildtools-doxygen-darwin-arm64.tar.gz -C doxygen-${{ github.event.inputs.doxygen-version }}/build/bin doxygen
+          fi
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doxygen-binary-${{ matrix.os }}
+          path: buildtools-doxygen-*.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: v${{ github.event.inputs.doxygen-version }}
+        name: Doxygen ${{ github.event.inputs.doxygen-version }}
+        artifacts: |
+          artifacts/doxygen-binary-ubuntu-22.04/buildtools-doxygen-linux-x86_64.tar.gz
+          artifacts/doxygen-binary-macos-14/buildtools-doxygen-darwin-arm64.tar.gz
+        token: ${{ secrets.GITHUB_TOKEN }}
