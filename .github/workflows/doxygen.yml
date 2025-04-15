@@ -12,8 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-14]
-      fail-fast: false
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-13, macos-14]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,16 +20,16 @@ jobs:
           python-version: '3.12'
 
       - name: Install Dependencies (Ubuntu)
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.os == 'ubuntu-22.04' || matrix.os == 'ubuntu-22.04-arm'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake flex bison
       - name: Install Dependencies (macOS)
-        if: matrix.os == 'macos-14'
+        if: matrix.os == 'macos-13' || matrix.os == 'macos-14'
         run: |
           brew update
           brew install cmake flex bison
-          echo "/opt/homebrew/bin:/opt/homebrew/opt/bison/bin" >> $GITHUB_PATH
+          echo "/usr/local/opt/bison/bin:/opt/homebrew/opt/bison/bin" >> $GITHUB_PATH
       - name: Download Doxygen
         run: |
           curl -L -o doxygen-${{ github.event.inputs.doxygen-version }}.src.tar.gz \
@@ -58,6 +57,10 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" = "ubuntu-22.04" ]; then
             tar -czvf buildtools-doxygen-linux-x86_64.tar.gz -C doxygen-${{ github.event.inputs.doxygen-version }}/build/bin doxygen
+          elif [ "${{ matrix.os }}" = "ubuntu-22.04-arm" ]; then
+            tar -czvf buildtools-doxygen-linux-arm64.tar.gz -C doxygen-${{ github.event.inputs.doxygen-version }}/build/bin doxygen
+          elif [ "${{ matrix.os }}" = "macos-13" ]; then
+            tar -czvf buildtools-doxygen-darwin-x86_64.tar.gz -C doxygen-${{ github.event.inputs.doxygen-version }}/build/bin doxygen
           else
             tar -czvf buildtools-doxygen-darwin-arm64.tar.gz -C doxygen-${{ github.event.inputs.doxygen-version }}/build/bin doxygen
           fi
@@ -82,5 +85,7 @@ jobs:
         name: Doxygen ${{ github.event.inputs.doxygen-version }}
         artifacts: |
           artifacts/doxygen-binary-ubuntu-22.04/buildtools-doxygen-linux-x86_64.tar.gz
+          artifacts/doxygen-binary-ubuntu-22.04-arm/buildtools-doxygen-linux-arm64.tar.gz
+          artifacts/doxygen-binary-macos-13/buildtools-doxygen-darwin-x86_64.tar.gz
           artifacts/doxygen-binary-macos-14/buildtools-doxygen-darwin-arm64.tar.gz
         token: ${{ secrets.GITHUB_TOKEN }}
