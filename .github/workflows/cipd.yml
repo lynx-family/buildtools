@@ -4,15 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'tag for releases'
+        description: "tag for releases"
         required: true
         type: string
       cipd-ensure-files:
-        description: 'the target cipd ensure file(s), split by comma. (e.g. gn.ensure)'
+        description: "the target cipd ensure file(s), split by comma. (e.g. gn.ensure)"
         required: true
         type: string
       custom_script:
-        description: 'use the custom script after downloading cipd package by ensure files'
+        description: "use the custom script after downloading cipd package by ensure files"
         type: string
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: prepare cipd
         run: |

@@ -1,0 +1,36 @@
+name: publish android sdk manager to release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "tag for releases"
+        required: true
+        type: string
+
+jobs:
+  download:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download android sdk manager
+        run: |
+          curl -L https://dl.google.com/android/repository/commandlinetools-mac-8512546_latest.zip -o commandlinetools-mac-8512546_latest.zip
+          curl -L https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools-linux-8512546_latest.zip
+          curl -L https://dl.google.com/android/repository/commandlinetools-win-8512546_latest.zip -o commandlinetools-win-8512546_latest.zip
+
+      - name: generate sha256 list
+        run: |
+          sha256sum commandlinetools-* > hash.md
+
+      - name: push to release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.event.inputs.tag }}
+          bodyFile: "hash.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "commandlinetools-*.zip,licenses/android-sdk-manager/*"
