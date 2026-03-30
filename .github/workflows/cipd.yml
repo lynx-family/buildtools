@@ -1,4 +1,4 @@
-name: publish cipd packages to release
+name: misc / publish CIPD packages
 
 on:
   workflow_dispatch:
@@ -33,10 +33,10 @@ jobs:
           echo "$GITHUB_WORKSPACE/depot_tools" >> $GITHUB_PATH
 
       - name: make archives of cipd packages
-        run: python3 -u publish_helper.py --ensure-files ${{ github.event.inputs.cipd-ensure-files }}
+        run: python3 -u misc/publish_helper.py --ensure-files ${{ github.event.inputs.cipd-ensure-files }}
 
       - name: generate sha256 list
-        run: python3 publish_helper.py --sha256-list
+        run: python3 misc/publish_helper.py --sha256-list
 
       - name: run custom script
         if: ${{ github.event.inputs.custom_script }}
