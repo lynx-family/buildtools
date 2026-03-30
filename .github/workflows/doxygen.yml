@@ -1,10 +1,10 @@
-name: Build Doxygen on Linux and macOS
+name: misc / Build Doxygen
 
 on:
   workflow_dispatch:
     inputs:
       doxygen-version:
-        description: 'Doxygen version to build (e.g., 1.13.2)'
+        description: "Doxygen version to build (e.g., 1.13.2)"
         required: true
 
 jobs:
@@ -74,18 +74,18 @@ jobs:
     needs: build
     runs-on: ubuntu-22.04
     steps:
-    - name: Download Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts
-    - name: Create Release
-      uses: ncipollo/release-action@v1
-      with:
-        tag: v${{ github.event.inputs.doxygen-version }}
-        name: Doxygen ${{ github.event.inputs.doxygen-version }}
-        artifacts: |
-          artifacts/doxygen-binary-ubuntu-22.04/buildtools-doxygen-linux-x86_64.tar.gz
-          artifacts/doxygen-binary-ubuntu-22.04-arm/buildtools-doxygen-linux-arm64.tar.gz
-          artifacts/doxygen-binary-macos-13/buildtools-doxygen-darwin-x86_64.tar.gz
-          artifacts/doxygen-binary-macos-14/buildtools-doxygen-darwin-arm64.tar.gz
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ github.event.inputs.doxygen-version }}
+          name: Doxygen ${{ github.event.inputs.doxygen-version }}
+          artifacts: |
+            artifacts/doxygen-binary-ubuntu-22.04/buildtools-doxygen-linux-x86_64.tar.gz
+            artifacts/doxygen-binary-ubuntu-22.04-arm/buildtools-doxygen-linux-arm64.tar.gz
+            artifacts/doxygen-binary-macos-13/buildtools-doxygen-darwin-x86_64.tar.gz
+            artifacts/doxygen-binary-macos-14/buildtools-doxygen-darwin-arm64.tar.gz
+          token: ${{ secrets.GITHUB_TOKEN }}
