@@ -5,6 +5,7 @@
 This repository hosts the following parts:
 
 - [misc](misc/README.md): collection of miscellaneous scripts for various purposes.
+- [tools_shared](tools_shared/README.md): the `tools-shared` repository provides common Lynx engineering tooling, including static checking and formatting capabilities used across repositories.
 
 ## Contribution
 
