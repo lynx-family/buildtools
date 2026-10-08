@@ -55,10 +55,6 @@ class ToolContext:
         )
 
     @property
-    def tools_shared_buildtools_dir(self) -> Path:
-        return self.tools_shared_root / "buildtools"
-
-    @property
     def project_buildtools_dir(self) -> Path:
         return self.project_root / "buildtools"
 
@@ -69,9 +65,6 @@ _DEFAULT_CONTEXT = ToolContext.create()
 class Env:
     TOOLS_SHARED_ROOT = str(_DEFAULT_CONTEXT.tools_shared_root)
     PROJECT_ROOT = str(_DEFAULT_CONTEXT.project_root)
-    TOOLS_SHARED_BUILD_TOOLS_PATH = str(
-        _DEFAULT_CONTEXT.tools_shared_buildtools_dir
-    )
     PROJECT_BUILD_TOOLS_PATH = str(_DEFAULT_CONTEXT.project_buildtools_dir)
     JAVA_LINT_CONFIG_PATH = str(
         _DEFAULT_CONTEXT.tools_shared_root / "checkers" / "java-lint-check"

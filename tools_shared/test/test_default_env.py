@@ -13,7 +13,9 @@ from unittest import mock
 TOOLS_SHARED_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOLS_SHARED_ROOT))
 
-from default_env import PROJECT_ROOT_ENV, ToolContext, resolve_project_root
+from checkers.android_code_style_checker import AndroidCodeStyleChecker
+from checkers.java_lint_checker import PMD_EXECUTABLE
+from default_env import PROJECT_ROOT_ENV, Env, ToolContext, resolve_project_root
 from gn_tools import gn_wrapper
 
 
@@ -83,12 +85,27 @@ class ToolContextTest(unittest.TestCase):
         self.assertEqual(context.tools_shared_root, TOOLS_SHARED_ROOT)
         self.assertEqual(context.project_root, Path(project_root).resolve())
         self.assertEqual(
-            context.tools_shared_buildtools_dir,
-            TOOLS_SHARED_ROOT / "buildtools",
-        )
-        self.assertEqual(
             context.project_buildtools_dir,
             Path(project_root).resolve() / "buildtools",
+        )
+
+    def test_build_tools_are_loaded_from_project(self):
+        self.assertEqual(
+            AndroidCodeStyleChecker.TOOL_PATH,
+            os.path.join(
+                Env.PROJECT_BUILD_TOOLS_PATH,
+                "checkstyle",
+                "checkstyle.jar",
+            ),
+        )
+        self.assertEqual(
+            PMD_EXECUTABLE,
+            os.path.join(
+                Env.PROJECT_BUILD_TOOLS_PATH,
+                "pmd",
+                "bin",
+                "run.sh",
+            ),
         )
 
 

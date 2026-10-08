@@ -9,6 +9,10 @@ import os
 from utils.merge_request import MergeRequest
 from default_env import Env
 
+PMD_EXECUTABLE = os.path.join(
+    Env.PROJECT_BUILD_TOOLS_PATH, "pmd", "bin", "run.sh"
+)
+
 
 def get_all_rulesets(type):
     path = os.path.join(Env.JAVA_LINT_CONFIG_PATH, "rulesets/" + type + "/")
@@ -35,7 +39,6 @@ def is_cmd_fail(cmd_err_):
 
 # java lint check on list of files
 def JavaLint(files):
-    pmd_dir = os.path.join(Env.TOOLS_SHARED_BUILD_TOOLS_PATH, "pmd/bin/")
     only_check_rulesets = get_all_rulesets("only_check")
     forbidden_rulesets = get_all_rulesets("forbidden")
 
@@ -58,7 +61,7 @@ def JavaLint(files):
                 Env.JAVA_LINT_CONFIG_PATH, f"rulesets/only_check/{rule}"
             )
             cmd = (
-                f'{pmd_dir}./run.sh pmd -d {" ".join(target_files)} -f text -R '
+                f'{PMD_EXECUTABLE} pmd -d {" ".join(target_files)} -f text -R '
                 f"{check_rule_path}"
             )
             P = subprocess.Popen(
@@ -86,7 +89,7 @@ def JavaLint(files):
                     Env.JAVA_LINT_CONFIG_PATH, f"rulesets/forbidden/{rule}"
                 )
                 cmd = (
-                    f'{pmd_dir}./run.sh pmd -d {" ".join(target_files)} -f text -R '
+                    f'{PMD_EXECUTABLE} pmd -d {" ".join(target_files)} -f text -R '
                     f"{forbidden_rule_path}"
                 )
                 P = subprocess.Popen(
