@@ -57,7 +57,7 @@ def main():
         "--root",
         type=str,
         required=False,
-        default=Env.SELF_PARENT_PATH,
+        default=Env.PROJECT_ROOT,
         help="The root directory of the project.",
     )
     parser.add_argument(

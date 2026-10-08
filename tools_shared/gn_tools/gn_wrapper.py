@@ -10,7 +10,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from default_env import Env
 
-gn_path = os.path.join(Env.SELF_PARENT_PATH, "buildtools", "gn")
+default_gn_dir = os.path.join(Env.PROJECT_BUILD_TOOLS_PATH, "gn")
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
     parser.add_argument(
         "--gn-dir",
         type=str,
-        default=gn_path,
+        default=default_gn_dir,
         help="Specifies the gn directory to use for the build",
     )
     parser.add_argument("--args", help="GN build arguments")
@@ -46,7 +46,7 @@ def main():
     gn_cmd = "gn"
     if sys.platform.startswith(("cygwin", "win")):
         gn_cmd += ".exe"
-    cmd = [f"{os.path.join(gn_path, gn_cmd)}"]
+    cmd = [os.path.join(args.gn_dir, gn_cmd)]
     for new_arg in remaining_args:
         cmd.append(new_arg.replace('"', '\\"'))
     cmd.append("--args=%s" % " ".join(gn_args))

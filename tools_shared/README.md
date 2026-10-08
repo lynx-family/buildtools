@@ -19,6 +19,14 @@ After this step, a sub-command "git lynx" will be added to the git tool.
 source envsetup.sh
 ```
 
+By default, tools-shared discovers the host project root from the current Git
+workspace. Set `TOOLS_SHARED_PROJECT_ROOT` when running outside the host
+workspace or from a nested Git repository:
+
+```bash
+export TOOLS_SHARED_PROJECT_ROOT=/path/to/host-project
+```
+
 ### Run check
 You can use the following commands to check if your last commit meets the pre-merge checks
 ```bash

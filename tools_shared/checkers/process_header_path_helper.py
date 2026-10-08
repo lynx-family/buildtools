@@ -28,6 +28,7 @@ import re
 import argparse
 import subprocess
 from config import Config
+from default_env import Env
 
 # Set the directory where the header path needs to be processed.
 DEFAULT_NEED_PROCESSED_FILE_DIRS = Config.value(
@@ -62,7 +63,7 @@ HEADER_DIRS_MANAGED_BY_LCM = Config.value(
     "checker-config", "header-path-checker", "header-dirs-managed-by-habitat"
 )
 # Project root directory
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+ROOT_DIR = Env.PROJECT_ROOT
 
 
 def formatString(string_set):

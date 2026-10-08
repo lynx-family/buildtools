@@ -35,7 +35,7 @@ def is_cmd_fail(cmd_err_):
 
 # java lint check on list of files
 def JavaLint(files):
-    pmd_dir = os.path.join(Env.BUILD_TOOLS_PATH, "pmd/bin/")
+    pmd_dir = os.path.join(Env.TOOLS_SHARED_BUILD_TOOLS_PATH, "pmd/bin/")
     only_check_rulesets = get_all_rulesets("only_check")
     forbidden_rulesets = get_all_rulesets("forbidden")
 

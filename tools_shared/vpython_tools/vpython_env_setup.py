@@ -93,7 +93,7 @@ def main():
     )
     parser.add_argument(
         "--root_dir",
-        default=Env.SELF_PARENT_PATH,
+        default=Env.PROJECT_ROOT,
         help="Root directory for the virtual environment",
     )
     parser.add_argument(

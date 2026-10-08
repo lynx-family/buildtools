@@ -24,7 +24,7 @@ def run_ets_lint(options, changed_files):
         print("No changed files related with arkts, skip arkts lint")
         return True
 
-    project_root_path = Env.SELF_PARENT_PATH
+    project_root_path = Env.PROJECT_ROOT
     harmony_path = os.path.abspath(os.path.join(project_root_path, "harmony"))
     config_file_path = os.path.join(harmony_path, "code-linter.json")
     codelinter_path = os.path.join(

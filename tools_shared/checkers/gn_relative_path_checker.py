@@ -25,7 +25,7 @@ def process_gn_relative_path(changed_files):
     gn_file_modified = True
     for file in changed_files:
         if file.endswith(".gn") or file.endswith(".gni"):
-            is_need_process, _ = process_file(file, Env.SELF_PARENT_PATH)
+            is_need_process, _ = process_file(file, Env.PROJECT_ROOT)
             if is_need_process:
                 print(
                     f"{COLORED_RED_MSG}Found gn files with absolute path in {file}. {COLORED_PRINT_END}"
