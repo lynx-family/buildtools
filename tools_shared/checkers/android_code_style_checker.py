@@ -30,8 +30,8 @@ class AndroidCodeStyleChecker(Checker):
     help = "java and kotlin code style check"
 
     CHECK_STYLE_XML = "check_style.xml"
-    TOOL_PATH = (
-        f"{Env.TOOLS_SHARED_BUILD_TOOLS_PATH}/checkstyle/checkstyle.jar"
+    TOOL_PATH = os.path.join(
+        Env.PROJECT_BUILD_TOOLS_PATH, "checkstyle", "checkstyle.jar"
     )
 
     def run_check_style(self, file):
