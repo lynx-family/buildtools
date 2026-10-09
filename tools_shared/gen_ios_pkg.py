@@ -3,14 +3,13 @@
 # Licensed under the Apache License Version 2.0 that can be found in the
 # LICENSE file in the root directory of this source tree.
 
-import os
-import sys
-import json
 import argparse
-import subprocess
-from cocoapods.specification import Specification
-from cocoapods.pod import Pod
+import json
+import os
+import shlex
 import shutil
+import subprocess
+import sys
 
 target_dir = "source_package"
 
@@ -26,6 +25,14 @@ def run_command(command, check=True):
     )
 
 
+def install_bundle(cache_path):
+    quoted_cache_path = shlex.quote(cache_path)
+    run_command(f"bundle config set --local path {quoted_cache_path}")
+    run_command(
+        "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk bundle install"
+    )
+
+
 def get_podspec_version(repo_name):
     with open(f"{repo_name}.podspec.json", "r") as f:
         content = json.load(f)
@@ -33,6 +40,9 @@ def get_podspec_version(repo_name):
 
 
 def get_source_files(repo_name, tag, zip_name):
+    from cocoapods.pod import Pod
+    from cocoapods.specification import Specification
+
     content = None
     with open(f"{repo_name}.podspec.json", "r") as f:
         content = json.load(f)
@@ -181,9 +191,7 @@ def main():
     """
     with open("Gemfile", "w") as f:
         f.write(gemfile_content)
-    run_command(
-        f"SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk bundle install --path {args.cache_path}"
-    )
+    install_bundle(args.cache_path)
     run_command(
         f"bundle exec pod ipc spec {repo_name}.podspec > {repo_name}.podspec.json"
     )
