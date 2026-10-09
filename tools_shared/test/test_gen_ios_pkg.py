@@ -14,6 +14,12 @@ import gen_ios_pkg
 
 
 class InstallBundleTest(unittest.TestCase):
+    def test_declares_bigdecimal_for_ruby_4(self):
+        self.assertIn(
+            'gem "bigdecimal", "4.0.1"',
+            gen_ios_pkg.GEMFILE_CONTENT,
+        )
+
     @mock.patch("gen_ios_pkg.run_command")
     def test_configures_install_path_before_bundle_install(self, run_command):
         gen_ios_pkg.install_bundle("/tmp/bundle cache")
