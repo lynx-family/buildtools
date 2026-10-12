@@ -104,6 +104,8 @@ class Checker:
         else:
             if options.changed:
                 changed_lines = mr.GetChangedLines().split("\n")
+            elif options.base_commit:
+                changed_lines = mr.GetLinesSinceCommit(options.base_commit).split("\n")
             else:
                 changed_lines = mr.GetLastCommitLines().split("\n")
 

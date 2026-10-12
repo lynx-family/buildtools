@@ -2,7 +2,12 @@
 # Copyright 2024 The Lynx Authors. All rights reserved.
 # Licensed under the Apache License Version 2.0 that can be found in the
 # LICENSE file in the root directory of this source tree.
+import re
 import subprocess
+
+
+class GitDiffError(RuntimeError):
+    pass
 
 
 class MergeRequest:
@@ -20,7 +25,11 @@ class MergeRequest:
         # Compatibale with Python 3.
         # Since the return value of communicate is bytes instead of str in Python 3.
         try:
-            return result.decode("utf-8"), error.decode("utf-8")
+            result = result.decode("utf-8")
+            error = error.decode("utf-8")
+            if p.returncode != 0 and not error:
+                error = f"Command failed with exit code {p.returncode}"
+            return result, error
         except UnicodeDecodeError:
             return "", f"Error decode for the result of command: {' '.join(command)}"
 
@@ -163,6 +172,58 @@ class MergeRequest:
         result, error = self.RunCommand(cmd)
         if error:
             print(("Error, can not get changed lines of last commit: %s" % error))
+        return result
+
+    def ResolveCommitSha(self, commit_sha):
+        # Only accept a hexadecimal object ID here. Besides documenting the
+        # intended interface, this keeps user input safe when passed through
+        # RunCommand, which executes command strings in a shell.
+        if not re.fullmatch(r"[0-9a-fA-F]{4,64}", commit_sha or ""):
+            raise ValueError(f"Invalid commit SHA: {commit_sha}")
+
+        command = ["git", "rev-parse", "--verify", f"{commit_sha}^{{commit}}"]
+        result, error = self.RunCommand(command)
+        resolved_sha = result.strip()
+        if (
+            error
+            or not resolved_sha
+            or not resolved_sha.lower().startswith(commit_sha.lower())
+        ):
+            raise ValueError(f"Invalid commit SHA: {commit_sha}")
+        return resolved_sha
+
+    def GetFilesSinceCommit(self, commit_sha):
+        base_commit = self.ResolveCommitSha(commit_sha)
+        command = [
+            "git",
+            "diff",
+            "--name-only",
+            "--diff-filter=ACMRT",
+            base_commit,
+            "HEAD",
+            "--",
+        ]
+        result, error = self.RunCommand(command)
+        if error:
+            raise GitDiffError(f"Can not get files changed since {commit_sha}: {error}")
+        return [
+            filename.strip() for filename in result.splitlines() if filename.strip()
+        ]
+
+    def GetLinesSinceCommit(self, commit_sha):
+        base_commit = self.ResolveCommitSha(commit_sha)
+        command = [
+            "git",
+            "diff",
+            "--diff-filter=ACMRT",
+            "-U0",
+            base_commit,
+            "HEAD",
+            "--",
+        ]
+        result, error = self.RunCommand(command)
+        if error:
+            raise GitDiffError(f"Can not get lines changed since {commit_sha}: {error}")
         return result
 
     # Get commit log of last commit.
