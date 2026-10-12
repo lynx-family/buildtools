@@ -33,7 +33,11 @@ You can use the following commands to check if your last commit meets the pre-me
 git lynx check --help
 git lynx check --list
 git lynx check
+git lynx check --base-commit <commit-sha>
 ```
+
+`--base-commit` checks the committed changes between the specified commit SHA
+and `HEAD`. It cannot be combined with `--all` or `--changed`.
 
 ### Run format
 If you have coding style issues, you can use the following commands to automatically format your code

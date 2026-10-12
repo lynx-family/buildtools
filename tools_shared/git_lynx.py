@@ -17,7 +17,7 @@ import subprocess
 from checkers.checker import Checker, CheckResult
 from checkers.checker_manager import CheckerManager
 from checkers.envsetup_utils import code_format_env_setup
-from utils.merge_request import MergeRequest
+from utils.merge_request import GitDiffError, MergeRequest
 from config import Config
 
 
@@ -74,6 +74,10 @@ def CMDcheck(parser, args):
         "--all", action="store_true", help="Check all source files in the project."
     )
     parser.add_option("--changed", action="store_true", help="Check all changed files")
+    parser.add_option(
+        "--base-commit",
+        help="Check changes between the specified commit SHA and HEAD",
+    )
     parser.add_option("--verbose", action="store_true", help="Print details")
 
     parser.add_option(
@@ -94,13 +98,26 @@ def CMDcheck(parser, args):
         )
         return
 
+    if options.base_commit and (options.all or options.changed):
+        parser.error("--base-commit cannot be used with --all or --changed")
+
     mr = MergeRequest()
-    if options.all:
-        changed_files = mr.GetAllFiles()
-    elif options.changed:
-        changed_files = mr.GetChangedFiles()
-    else:
-        changed_files = mr.GetLastCommitFiles()
+    try:
+        if options.all:
+            changed_files = mr.GetAllFiles()
+        elif options.changed:
+            changed_files = mr.GetChangedFiles()
+        elif options.base_commit:
+            # Resolve once up front so invalid SHAs fail before any checker runs.
+            options.base_commit = mr.ResolveCommitSha(options.base_commit)
+            changed_files = mr.GetFilesSinceCommit(options.base_commit)
+        else:
+            changed_files = mr.GetLastCommitFiles()
+    except ValueError as error:
+        parser.error(str(error))
+    except GitDiffError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        sys.exit(1)
 
     if options.verbose:
         print("Changed files:\n  " + "\n  ".join(changed_files) + "\n")
@@ -143,7 +160,11 @@ def CMDcheck(parser, args):
             if options.checkers != "all" and c.name not in options.checkers.split(","):
                 continue
             print_cutting_line(c.name)
-            res = c.run(options, mr, changed_files)
+            try:
+                res = c.run(options, mr, changed_files)
+            except GitDiffError as error:
+                print(f"Error: {error}", file=sys.stderr)
+                sys.exit(1)
             print("\n[%s] %s" % (c.name, res))
             print_cutting_line()
             print("")
